@@ -1,0 +1,4 @@
+.sec/
+.terraform/
+*terraform.tfplan
+terraform/*
