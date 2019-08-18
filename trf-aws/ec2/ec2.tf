@@ -2,37 +2,12 @@ variable "env" {}
 variable "tags" {}
 variable "this" {}
 
-resource "aws_lb" "this" {
-  count              = var.this.aws_lb != null ? 1 : 0
-  name               = var.tags.Name
-  internal           = false
-  load_balancer_type = "application"
-  security_groups    = var.this.aws_lb.security_groups[*].id
-  subnets            = var.this.aws_lb.subnets[*].id
-  tags               = var.tags
-}
+resource "aws_instance" "web" {
+  ami           = "${data.aws_ami.ubuntu.id}"
+  instance_type = "t2.micro"
 
-resource "aws_autoscaling_group" "this" {
-  max_size                  = var.this.aws_autoscaling_group.max_size
-  min_size                  = var.this.aws_autoscaling_group.min_size
-  desired_capacity          = var.this.aws_autoscaling_group.desired_capacity
-  health_check_type         = var.this.aws_autoscaling_group.health_check_type != null ? var.this.aws_autoscaling_group.health_check_type : "EC2"
-  health_check_grace_period = var.this.aws_autoscaling_group.health_check_grace_period != null ? var.this.aws_autoscaling_group.health_check_grace_period : 300
-
-  vpc_zone_identifier = var.this.aws_autoscaling_group.vpc_zone_identifier[*].id
-  # target_group_arns   = var.this.aws_autoscaling_group.target_group_arns[*].arn
-
-  launch_template {
-    id      = aws_launch_template.this.id
-    version = "$Latest"
-  }
-  dynamic "tag" {
-    for_each = var.tags
-    content {
-      key                 = tag.key
-      value               = tag.value
-      propagate_at_launch = true
-    }
+  tags = {
+    Name = "HelloWorld"
   }
 }
 
